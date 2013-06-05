@@ -1,9 +1,10 @@
 
 from copy import copy
 
+from django.conf import settings
 from django.contrib.contenttypes.generic import GenericRelation
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import IntegerField, CharField, FloatField
+from django.db.models import get_model, IntegerField, CharField, FloatField
 from django.db.models.signals import post_save, post_delete
 
 
@@ -31,11 +32,24 @@ class BaseGenericRelation(GenericRelation):
         Set up some defaults and check for a ``related_model``
         attribute for the ``to`` argument.
         """
+        self.frozen_by_south = kwargs.pop("frozen_by_south", False)
         kwargs.setdefault("object_id_field", "object_pk")
         to = getattr(self, "related_model", None)
         if to:
             kwargs.setdefault("to", to)
         super(BaseGenericRelation, self).__init__(*args, **kwargs)
+
+    def db_type(self, connection):
+        """
+        South expects this to return a string for initial migrations
+        against MySQL, to check for text or geometery columns. These
+        generic fields are neither of those, but returning an empty
+        string here at least allows migrations to run successfully.
+        See http://south.aeracode.org/ticket/1204
+        """
+        if self.frozen_by_south:
+            return ""
+        return None
 
     def contribute_to_class(self, cls, name):
         """
@@ -50,16 +64,20 @@ class BaseGenericRelation(GenericRelation):
                     self.__class__.__name__, cls.__name__, cls.__name__,
                     name, field.name)
                 raise ImproperlyConfigured(e)
-        super(BaseGenericRelation, self).contribute_to_class(cls, name)
         self.related_field_name = name
+        super(BaseGenericRelation, self).contribute_to_class(cls, name)
         # Not applicable to abstract classes, and in fact will break.
-        if not cls._meta.abstract:
+        if not cls._meta.abstract and not self.frozen_by_south:
             for (name_string, field) in self.fields.items():
                 if "%s" in name_string:
                     name_string = name_string % name
                 if not field.verbose_name:
                     field.verbose_name = self.verbose_name
                 cls.add_to_class(name_string, copy(field))
+            # Add a getter function to the model we can use to retrieve
+            # the field/manager by name.
+            getter_name = "get_%s_name" % self.__class__.__name__.lower()
+            cls.add_to_class(getter_name, lambda self: name)
             # For some unknown reason the signal won't be triggered
             # if given a sender arg, particularly when running
             # Cartridge with the field RichTextPage.keywords - so
@@ -76,13 +94,19 @@ class BaseGenericRelation(GenericRelation):
         """
         # Manually check that the instance matches the relation,
         # since we don't specify a sender for the signal.
-        if not isinstance(kwargs["instance"], self.rel.to):
+        try:
+            to = self.rel.to
+            if isinstance(to, basestring):
+                to = get_model(*to.split(".", 1))
+            if not isinstance(kwargs["instance"], to):
+                raise TypeError
+        except (TypeError, ValueError):
             return
         for_model = kwargs["instance"].content_type.model_class()
         if issubclass(for_model, self.model):
             instance_id = kwargs["instance"].object_pk
             try:
-                instance = self.model.objects.get(id=instance_id)
+                instance = for_model.objects.get(id=instance_id)
             except self.model.DoesNotExist:
                 # Instance itself was deleted - signals are irrelevant.
                 return
@@ -152,7 +176,7 @@ class KeywordsField(BaseGenericRelation):
         isn't a form field mapped to ``GenericRelation`` model fields.
         """
         from mezzanine.generic.forms import KeywordsWidget
-        kwargs["widget"] = KeywordsWidget()
+        kwargs["widget"] = KeywordsWidget
         return super(KeywordsField, self).formfield(**kwargs)
 
     def save_form_data(self, instance, data):
@@ -192,10 +216,13 @@ class KeywordsField(BaseGenericRelation):
         if hasattr(cls, "search_fields") and name in cls.search_fields:
             try:
                 weight = cls.search_fields[name]
-            except AttributeError:
+            except TypeError:
                 # search_fields is a sequence.
                 index = cls.search_fields.index(name)
+                search_fields_type = type(cls.search_fields)
+                cls.search_fields = list(cls.search_fields)
                 cls.search_fields[index] = string_field_name
+                cls.search_fields = search_fields_type(cls.search_fields)
             else:
                 del cls.search_fields[name]
                 cls.search_fields[string_field_name] = weight
@@ -221,6 +248,7 @@ class RatingField(BaseGenericRelation):
 
     related_model = "generic.Rating"
     fields = {"%s_count": IntegerField(default=0, editable=False),
+              "%s_sum": IntegerField(default=0, editable=False),
               "%s_average": FloatField(default=0, editable=False)}
 
     def related_items_changed(self, instance, related_manager):
@@ -229,7 +257,21 @@ class RatingField(BaseGenericRelation):
         """
         ratings = [r.value for r in related_manager.all()]
         count = len(ratings)
-        average = sum(ratings) / float(count) if count > 0 else 0
+        _sum = sum(ratings)
+        average = _sum / float(count) if count > 0 else 0
         setattr(instance, "%s_count" % self.related_field_name, count)
+        setattr(instance, "%s_sum" % self.related_field_name, _sum)
         setattr(instance, "%s_average" % self.related_field_name, average)
         instance.save()
+
+
+# South requires custom fields to be given "rules".
+# See http://south.aeracode.org/docs/customfields.html
+if "south" in settings.INSTALLED_APPS:
+    try:
+        from south.modelsinspector import add_introspection_rules
+        add_introspection_rules(rules=[((BaseGenericRelation,), [],
+                            {"frozen_by_south": [True, {"is_value": True}]})],
+            patterns=["mezzanine\.generic\.fields\."])
+    except ImportError:
+        pass

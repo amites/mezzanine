@@ -11,6 +11,9 @@ found next to each piece of editable content, such as a page's title or a
 blog post's body. Clicking on the Edit icon will allow the author to update
 the individual piece of content without leaving the page.
 
+In-line editing can be disabled by setting ``INLINE_EDITING_ENABLED`` to
+``False``.
+
 Template Configuration
 ======================
 
@@ -34,6 +37,19 @@ Typically this only needs to be defined in your top-most base template::
         {% editable_loader %}
     </body>
     </html>
+
+If your site does not use jQuery, you'll need to include it conditionally in
+your template's `<head>` if the user is a staff member. If you're using a
+different JS library, you can use `jQuery.noConflict()` to avoid it overwriting
+the `$` symbol.
+
+::
+
+    {% if user.is_staff %}
+        <script src="{{ STATIC_URL }}mezzanine/js/jquery-1.7.1.min.js">
+            jQuery.noConflict();
+        </script>
+    {% endif %}
 
 The second step is to wrap each instance of a model field with the
 ``editable`` and ``endeditable`` template tags, with the field specified as

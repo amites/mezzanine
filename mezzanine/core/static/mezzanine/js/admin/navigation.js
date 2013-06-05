@@ -1,57 +1,35 @@
-
-// Global flag used for checking whether to hide the visible menu
-// after a small timeout has passed when mousing out from a menu.
-var onMenu;
-
 $(function() {
-
     // Empty out the breadcrumbs div and add the menu into it.
     $('.breadcrumbs').html('')
                      .append($('.dropdown-menu').show())
                      .css({display: 'inline-block'});
 
-    $('.dropdown-menu a').mouseover(function() {
-        var menu = $(this).parent().find('.dropdown-menu-menu').clone();
-        // If we're over a primary menu link, clone the child menu and
-        // show it.
-        if (menu.length == 1) {
-            onMenu = true;
-            $('.cloned').remove();
-            $('body').append(menu);
-            // Position the child menu under its parent.
-            var pos = {
-                top: $(this).offset().top + $(this).height(),
-                left: $(this).offset().left,
-                position: 'absolute'
-            }
-            menu.css(pos).addClass('cloned').show();
-            // Ensure the menu stays visible when we mouse onto
-            // another item in it.
-            menu.mouseover(function() {
-                onMenu = true;
-            });
-            // Trigger the parent mouseout if we mouseout of the menu.
-            menu.mouseout(function() {
-                $('.dropdown-menu a').mouseout();
-            });
-        }
+    // Set the hrefs for the primary menu items to the href of their first
+    // child (unless the primary menu item already has an href).
+    $('.dropdown-menu a').each(function() {
+       if ( $(this).attr('href') == '#' ) {
+         $(this).attr('href', $(this).parent().find('.dropdown-menu-menu a:first').attr('href'));
+       }
     });
 
-    // Set a timeout to hide visible menus on mouseout of primary
-    // menu item.
-    $('.dropdown-menu a').mouseout(function() {
-        if ($(this).parent().find('.dropdown-menu-menu').length == 1) {
-            onMenu = false;
-            window.setTimeout(function() {
-                if (!onMenu) {
-                    $('.cloned').remove();
-                }
-            }, 1000);
-        }
-    })
-
     // Provides link to site.
-    $('#user-tools li:last').before('<li><a href="/">View Site</a></li>');
+    $('#user-tools li:last').before('<li>' + window.__home_link + '</li>');
+
+    // Fixes issue #594 but is incomplete, see #677
+
+    // function contentMargin() {
+    //     // Set margin on main content area so it clears all the fixed-position elements above it
+    //     var clearedHeight = 21;
+    //     $('#content').prevAll().each(function() {
+    //         clearedHeight += $(this).height();
+    //     });
+
+    //     $('#content').css('margin-top', clearedHeight);
+    // }
+
+    // // Check that content clears menus on both load and resize
+    // contentMargin();
+    // $(window).resize(contentMargin);
 
 });
 

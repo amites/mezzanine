@@ -1,4 +1,4 @@
-$(function($) {
+jQuery(function($) {
 
     // Add AJAX submit handler for each editable form.
     $('.editable-form').submit(function() {
@@ -36,30 +36,39 @@ $(function($) {
     })
 
     // Iterate through each of the editable areas and set them up.
-    $.each($('.editable-original'), function(i, editable) {
-        editable = $(editable);
-        // Position the editable area's edit link.
-        var link = editable.next('.editable-link');
-        link.css({top: editable.offset().top,
-            left: editable.offset().left - link.width() - 12});
-        // Apply the editable area's overlay handler.
-        var expose = {color: '#333', loadSpeed: 200, opacity: 0.9};
-        var overlay = {expose: expose, closeOnClick: true, close: ':button'};
-        link.overlay(overlay);
-        // Position the editable area's highlight.
-        link.next('.editable-highlight').css({
-            width: editable.width(), height: editable.height(),
-            top: editable.offset().top, left: editable.offset().left
+    var realign = function() {
+        $.each($('.editable-original'), function(i, editable) {
+            editable = $(editable);
+            // Position the editable area's edit link.
+            var link = editable.next('.editable-link');
+            link.offset({top: editable.offset().top,
+                left: editable.offset().left - link.outerWidth() - 1});
+            // Apply the editable area's overlay handler.
+            var expose = {color: '#333', loadSpeed: 200, opacity: 0.9};
+            var overlay = {expose: expose, closeOnClick: true, close: ':button', left: 'center', top: 'center'};
+            link.overlay(overlay);
+            // Position the editable area's highlight.
+            var highlight = link.next('.editable-highlight')
+            highlight.css({
+                width: editable.width(),
+                height: editable.height()
+            });
+            highlight.offset({top: editable.offset().top, left: editable.offset().left});
         });
-    });
+    };
+
+    realign();
 
     // Show/hide the editable area's highlight when mousing over/out the of
     // the edit link.
-    $('.editable-link').mouseover(function() {
-        $(this).next('.editable-highlight').show();
+    $('.editable-link').hover(function(e) {
+        $(this).next('.editable-highlight').css('visibility', 'visible');
+    }, function(e) {
+        $(this).next('.editable-highlight').css('visibility', 'hidden');
     });
-    $('.editable-link').mouseout(function() {
-        $(this).next('.editable-highlight').hide();
+
+    $('body, .editable-original').on('resize', function(e) {
+        realign();
     });
 
     // Add the toolbar HTML and handlers.
@@ -73,15 +82,17 @@ $(function($) {
     $(window.__toolbar_html).appendTo('body');
     $('#editable-toolbar-toggle').click(function() {
         var toggle = $(this);
-        var controls = $('.editable-link, ' +
-            '#editable-toolbar *[id!=editable-toolbar-toggle]');
+        var links = $('.editable-link');
+        var toolbar = $('#editable-toolbar *[id!=editable-toolbar-toggle]');
         if (toggle.text() == '<<') {
             toggle.text('>>');
-            controls.hide();
+            toolbar.hide();
+            links.css('visibility', 'hidden');
             document.cookie = cookie + '=1; path=/';
         } else {
             toggle.text('<<');
-            controls.show();
+            toolbar.show();
+            links.css('visibility', 'visible');
             document.cookie = cookie + '=; path=/';
         }
         return false;

@@ -1,9 +1,51 @@
 .. THIS DOCUMENT IS AUTO GENERATED VIA conf.py
 
-``ACCOUNTS_ENABLED``
---------------------
+``ACCOUNTS_APPROVAL_EMAILS``
+----------------------------
 
-If ``True``, users can create an account.
+A comma separated list of email addresses that will receive an email notification each time a new account is created that requires approval.
+
+Default: ``''``
+
+``ACCOUNTS_APPROVAL_REQUIRED``
+------------------------------
+
+If ``True``, when users create an account, they will not be enabled by default and a staff member will need to activate their account in the admin interface.
+
+Default: ``False``
+
+``ACCOUNTS_MIN_PASSWORD_LENGTH``
+--------------------------------
+
+Minimum length for passwords
+
+Default: ``6``
+
+``ACCOUNTS_NO_USERNAME``
+------------------------
+
+If ``True``, the username field will be excluded from sign up and account update forms.
+
+Default: ``False``
+
+``ACCOUNTS_PROFILE_FORM_CLASS``
+-------------------------------
+
+Dotted package path and class name of profile form to use for users signing up and updating their profile, when ``mezzanine.accounts`` is installed.
+
+Default: ``'mezzanine.accounts.forms.ProfileForm'``
+
+``ACCOUNTS_PROFILE_FORM_EXCLUDE_FIELDS``
+----------------------------------------
+
+List of fields to exclude from the profile form.
+
+Default: ``()``
+
+``ACCOUNTS_PROFILE_VIEWS_ENABLED``
+----------------------------------
+
+If ``True``, users will have their own public profile pages.
 
 Default: ``False``
 
@@ -13,6 +55,13 @@ Default: ``False``
 If ``True``, when users create an account, they will be sent an email with a verification link, which they must click to enable their account.
 
 Default: ``False``
+
+``ADD_PAGE_ORDER``
+------------------
+
+A sequence of ``Page`` subclasses in the format ``app_label.model_name``, that controls the ordering of items in the select drop-down for adding new pages within the admin page tree interface.
+
+Default: ``('pages.RichTextPage',)``
 
 ``ADMIN_MENU_ORDER``
 --------------------
@@ -28,6 +77,13 @@ Unregister these models from the admin.
 
 Default: ``()``
 
+``ADMIN_THUMB_SIZE``
+--------------------
+
+Size of thumbnail previews for image fields in the admin interface.
+
+Default: ``'24x24'``
+
 ``AKISMET_API_KEY``
 -------------------
 
@@ -35,17 +91,10 @@ Key for `http://akismet.com <http://akismet.com>`_ spam filtering service. Used 
 
 Default: ``''``
 
-``BLOG_BITLY_KEY``
-------------------
+``BITLY_ACCESS_TOKEN``
+----------------------
 
-Key for `http://bit.ly <http://bit.ly>`_ URL shortening service.
-
-Default: ``''``
-
-``BLOG_BITLY_USER``
--------------------
-
-Username for `http://bit.ly <http://bit.ly>`_ URL shortening service.
+Access token for `http://bit.ly <http://bit.ly>`_ URL shortening service.
 
 Default: ``''``
 
@@ -56,6 +105,13 @@ Number of blog posts shown on a blog listing page.
 
 Default: ``5``
 
+``BLOG_RSS_LIMIT``
+------------------
+
+Number of most recent blog posts shown in the RSS feed. Set to ``None`` to display all blog posts in the RSS feed.
+
+Default: ``20``
+
 ``BLOG_SLUG``
 -------------
 
@@ -63,12 +119,12 @@ Slug of the page object for the blog.
 
 Default: ``'blog'``
 
-``BLOG_URLS_USE_DATE``
-----------------------
+``BLOG_URLS_DATE_FORMAT``
+-------------------------
 
-If ``True``, URLs for blog post include the month and year. Eg: /blog/yyyy/mm/slug/
+A string containing the value ``year``, ``month``, or ``day``, which controls the granularity of the date portion in the URL for each blog post. Eg: ``year`` will define URLs in the format /blog/yyyy/slug/, while ``day`` will define URLs with the format /blog/yyyy/mm/dd/slug/. An empty string means the URLs will only use the slug, and not contain any portion of the date at all.
 
-Default: ``False``
+Default: ``''``
 
 ``BLOG_USE_FEATURED_IMAGE``
 ---------------------------
@@ -76,6 +132,13 @@ Default: ``False``
 Enable featured images in blog posts
 
 Default: ``False``
+
+``CACHE_SET_DELAY_SECONDS``
+---------------------------
+
+Mezzanine's caching uses a technique know as mint caching. This is where the requested expiry for a cache entry is stored with the cache entry in cache, and the real expiry used has the ``CACHE_SET_DELAY`` added to it. Then on a cache get, the store expiry is checked, and if it has past, the cache entry is set again, and no entry is returned. This tries to ensure that cache misses never occur, and if many clients were to get a cache miss at once, only one would actually need to re-generated the cache entry.
+
+Default: ``30``
 
 ``COMMENTS_ACCOUNT_REQUIRED``
 -----------------------------
@@ -112,6 +175,13 @@ Shortname for the `http://disqus.com <http://disqus.com>`_ comments service.
 
 Default: ``''``
 
+``COMMENTS_NOTIFICATION_EMAILS``
+--------------------------------
+
+A comma separated list of email addresses that will receive an email notification each time a new comment is posted on the site.
+
+Default: ``''``
+
 ``COMMENTS_NUM_LATEST``
 -----------------------
 
@@ -132,6 +202,20 @@ Default: ``True``
 If ``True``, comments that have ``is_public`` unchecked will still be displayed, but replaced with a ``waiting to be approved`` message.
 
 Default: ``True``
+
+``COMMENTS_USE_RATINGS``
+------------------------
+
+If ``True``, comments can be rated.
+
+Default: ``True``
+
+``COMMENT_FILTER``
+------------------
+
+Dotted path to the function to call on a comment's value before it is rendered to the template.
+
+Default: ``None``
 
 ``DASHBOARD_TAGS``
 ------------------
@@ -175,6 +259,13 @@ If ``True``, emails sent to extra recipients for form submissions won't be sent 
 
 Default: ``False``
 
+``FORMS_EXTRA_FIELDS``
+----------------------
+
+Extra field types for the forms app. Should contain a sequence of three-item sequences, each containing the ID, dotted import path for the field class, and field name, for each custom field type. The ID is simply a numeric constant for the field, but cannot be a value already used, so choose a high number such as 100 or greater to avoid conflicts.
+
+Default: ``()``
+
 ``FORMS_FIELD_MAX_LENGTH``
 --------------------------
 
@@ -217,12 +308,26 @@ A sequence mapping host names to themes, allowing different templates to be serv
 
 Default: ``()``
 
+``INLINE_EDITING_ENABLED``
+--------------------------
+
+If ``True``, front-end inline editing will be enabled.
+
+Default: ``True``
+
 ``JQUERY_FILENAME``
 -------------------
 
 Name of the jQuery file found in mezzanine/core/static/mezzanine/js/
 
 Default: ``'jquery-1.7.1.min.js'``
+
+``JQUERY_UI_FILENAME``
+----------------------
+
+Name of the jQuery UI file found in mezzanine/core/static/mezzanine/js/
+
+Default: ``'jquery-ui-1.9.1.custom.min.js'``
 
 ``MAX_PAGING_LINKS``
 --------------------
@@ -231,26 +336,75 @@ Max number of paging links to display when paginating.
 
 Default: ``10``
 
-``PAGES_MENU_SHOW_ALL``
+``MEDIA_LIBRARY_PER_SITE``
+--------------------------
+
+If ``True``, each site will use its own directory within the filebrowser media library.
+
+Default: ``False``
+
+``OWNABLE_MODELS_ALL_EDITABLE``
+-------------------------------
+
+Models that subclass ``Ownable`` and use the ``OwnableAdmin`` have their admin change-list records filtered down to records owned by the current user. This setting contains a sequence of models in the format ``app_label.object_name``, that when subclassing ``Ownable``, will still show all records in the admin change-list interface, regardless of the current user.
+
+Default: ``()``
+
+``PAGES_PUBLISHED_INCLUDE_LOGIN_REQUIRED``
+------------------------------------------
+
+If ``True``, pages with ``login_required`` checked will still be listed in menus and search results, for unauthenticated users. Regardless of this setting, when an unauthenticated user accesses a page with ``login_required`` checked, they'll be redirected to the login page.
+
+Default: ``False``
+
+``PAGE_MENU_TEMPLATES``
 -----------------------
 
-If ``True``, the pages menu will show all levels of navigation, otherwise child pages are only shown when viewing the parent page.
+A sequence of templates used by the ``page_menu`` template tag. Each item in the sequence is a three item sequence, containing a unique ID for the template, a label for the template, and the template path. These templates are then available for selection when editing which menus a page should appear in. Note that if a menu template is used that doesn't appear in this setting, all pages will appear in it.
 
-Default: ``True``
+Default: ``((1, u'Top navigation bar', 'pages/menus/dropdown.html'), (2, u'Left-hand tree', 'pages/menus/tree.html'), (3, u'Footer', 'pages/menus/footer.html'))``
 
-``RATINGS_MAX``
----------------
+``PAGE_MENU_TEMPLATES_DEFAULT``
+-------------------------------
 
-Max value for a rating.
+A sequence of IDs from the ``PAGE_MENU_TEMPLATES`` setting that defines the default menu templates selected when creating new pages. By default all menu templates are selected. Set this setting to an empty sequence to have no templates selected by default.
 
-Default: ``5``
+Default: ``None``
 
-``RATINGS_MIN``
----------------
+``RATINGS_ACCOUNT_REQUIRED``
+----------------------------
 
-Min value for a rating.
+If ``True``, users must log in to rate content such as blog posts and comments.
 
-Default: ``1``
+Default: ``False``
+
+``RATINGS_RANGE``
+-----------------
+
+A sequence of integers that are valid ratings.
+
+Default: ``[1, 2, 3, 4, 5]``
+
+``RICHTEXT_ALLOWED_ATTRIBUTES``
+-------------------------------
+
+List of HTML attributes that won't be stripped from ``RichTextField`` instances.
+
+Default: ``('abbr', 'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt', 'axis', 'border', 'cellpadding', 'cellspacing', 'char', 'charoff', 'charset', 'checked', 'cite', 'class', 'clear', 'cols', 'colspan', 'color', 'compact', 'coords', 'datetime', 'dir', 'disabled', 'enctype', 'for', 'frame', 'headers', 'height', 'href', 'hreflang', 'hspace', 'id', 'ismap', 'label', 'lang', 'longdesc', 'maxlength', 'media', 'method', 'multiple', 'name', 'nohref', 'noshade', 'nowrap', 'prompt', 'readonly', 'rel', 'rev', 'rows', 'rowspan', 'rules', 'scope', 'selected', 'shape', 'size', 'span', 'src', 'start', 'style', 'summary', 'tabindex', 'target', 'title', 'type', 'usemap', 'valign', 'value', 'vspace', 'width', 'xml:lang')``
+
+``RICHTEXT_ALLOWED_STYLES``
+---------------------------
+
+List of inline CSS styles that won't be stripped from ``RichTextField`` instances.
+
+Default: ``()``
+
+``RICHTEXT_ALLOWED_TAGS``
+-------------------------
+
+List of HTML tags that won't be stripped from ``RichTextField`` instances.
+
+Default: ``('a', 'abbr', 'acronym', 'address', 'area', 'b', 'bdo', 'big', 'blockquote', 'br', 'button', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dir', 'div', 'dl', 'dt', 'em', 'fieldset', 'font', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'map', 'menu', 'ol', 'optgroup', 'option', 'p', 'pre', 'q', 's', 'samp', 'select', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'tr', 'tt', 'u', 'ul', 'var', 'wbr')``
 
 ``RICHTEXT_FILTER``
 -------------------
@@ -259,6 +413,22 @@ Dotted path to the function to call on a ``RichTextField`` value before it is re
 
 Default: ``None``
 
+``RICHTEXT_FILTER_LEVEL``
+-------------------------
+
+*Do not change this setting unless you know what you're doing.*
+
+When content is saved in a Rich Text (WYSIWYG) field, unsafe HTML tags and attributes are stripped from the content to protect against staff members intentionally adding code that could be used to cause problems, such as changing their account to a super-user with full access to the system.
+
+This setting allows you to change the level of filtering that occurs. Setting it to low will allow certain extra tags to be permitted, such as those required for embedding video. While these tags are not the main candidates for users adding malicious code, they are still considered dangerous and could potentially be mis-used by a particularly technical user, and so are filtered out when the filtering level is set to high.
+
+Setting the filtering level to no filtering, will disable all filtering, and allow any code to be entered by staff members, including script tags.
+
+Choices: High: ``1``, Low (allows video, iframe, Flash, etc): ``2``, No filtering: ``3``
+
+
+Default: ``1``
+
 ``RICHTEXT_WIDGET_CLASS``
 -------------------------
 
@@ -266,12 +436,26 @@ Dotted package path and class name of the widget to use for the ``RichTextField`
 
 Default: ``'mezzanine.core.forms.TinyMceWidget'``
 
+``SEARCH_MODEL_CHOICES``
+------------------------
+
+Sequence of models that will be provided by default as choices in the search form. Each model should be in the format ``app_label.model_name``. Only models that subclass ``mezzanine.core.models.Displayable`` should be used.
+
+Default: ``('pages.Page', 'blog.BlogPost')``
+
 ``SEARCH_PER_PAGE``
 -------------------
 
 Number of results shown in the search results page.
 
 Default: ``10``
+
+``SITE_PREFIX``
+---------------
+
+A URL prefix for mounting all of Mezzanine's urlpatterns under. When using this, you'll also need to manually apply it to your project's root ``urls.py`` module. The root ``urls.py`` module provided by Mezzanine's ``mezzanine-project`` command contains an example of this towards its end.
+
+Default: ``''``
 
 ``SITE_TAGLINE``
 ----------------
@@ -294,12 +478,26 @@ Dotted Python path to the callable for converting strings into URL slugs. Defaul
 
 Default: ``'mezzanine.utils.urls.slugify_unicode'``
 
+``SPAM_FILTERS``
+----------------
+
+Sequence of dotted Python paths to callable functions used for checking posted content (such as forms or comments) is spam. Each function should accept three arguments: the request object, the form object, and the URL that was posted from. Defaults to ``mezzanine.utils.views.is_spam_akismet`` which will use the `http://akismet.com <http://akismet.com>`_ spam filtering service when the ``AKISMET_API_KEY`` setting is configured.
+
+Default: ``('mezzanine.utils.views.is_spam_akismet',)``
+
 ``SSL_ENABLED``
 ---------------
 
 If ``True``, users will be automatically redirected to HTTPS for the URLs specified by the ``SSL_FORCE_URL_PREFIXES`` setting.
 
 Default: ``False``
+
+``SSL_FORCED_PREFIXES_ONLY``
+----------------------------
+
+If ``True``, only URLs specified by the ``SSL_FORCE_URL_PREFIXES`` setting will be accessible over SSL, and all other URLs will be redirected back to HTTP if accessed over HTTPS.
+
+Default: ``True``
 
 ``SSL_FORCE_HOST``
 ------------------
@@ -334,7 +532,7 @@ Default: ``4``
 
 Sequence of setting names available within templates.
 
-Default: ``('ACCOUNTS_ENABLED', 'ADMIN_MEDIA_PREFIX', 'BLOG_BITLY_USER', 'BLOG_BITLY_KEY', 'COMMENTS_DISQUS_SHORTNAME', 'COMMENTS_NUM_LATEST', 'COMMENTS_DISQUS_API_PUBLIC_KEY', 'COMMENTS_DISQUS_API_SECRET_KEY', 'DEV_SERVER', 'FORMS_USE_HTML5', 'GRAPPELLI_INSTALLED', 'GOOGLE_ANALYTICS_ID', 'JQUERY_FILENAME', 'LOGIN_URL', 'LOGOUT_URL', 'PAGES_MENU_SHOW_ALL', 'SITE_TITLE', 'SITE_TAGLINE', 'RATINGS_MAX')``
+Default: ``('ACCOUNTS_VERIFICATION_REQUIRED', 'BITLY_ACCESS_TOKEN', 'BLOG_USE_FEATURED_IMAGE', 'COMMENTS_DISQUS_SHORTNAME', 'COMMENTS_NUM_LATEST', 'COMMENTS_DISQUS_API_PUBLIC_KEY', 'COMMENTS_DISQUS_API_SECRET_KEY', 'COMMENTS_USE_RATINGS', 'DEV_SERVER', 'FORMS_USE_HTML5', 'GRAPPELLI_INSTALLED', 'GOOGLE_ANALYTICS_ID', 'JQUERY_FILENAME', 'LOGIN_URL', 'LOGOUT_URL', 'SITE_TITLE', 'SITE_TAGLINE')``
 
 ``THUMBNAILS_DIR_NAME``
 -----------------------
@@ -349,6 +547,37 @@ Default: ``'.thumbnails'``
 URL for the JavaScript file (relative to ``STATIC_URL``) that handles configuring TinyMCE when the default ``RICHTEXT_WIDGET_CLASS`` is used.
 
 Default: ``'mezzanine/js/tinymce_setup.js'``
+
+``TWITTER_DEFAULT_NUM_TWEETS``
+------------------------------
+
+Number of tweets to display in the default Twitter feed.
+
+Default: ``3``
+
+``TWITTER_DEFAULT_QUERY``
+-------------------------
+
+Twitter query to use for the default query type.
+
+Default: ``'django mezzanine'``
+
+``TWITTER_DEFAULT_QUERY_TYPE``
+------------------------------
+
+Type of query that will be used to retrieve tweets for the default Twitter feed.
+
+Choices: User: ``user``, List: ``list``, Search: ``search``
+
+
+Default: ``'search'``
+
+``UPLOAD_TO_HANDLERS``
+----------------------
+
+Dict mapping file field names in the format ``app_label.model_name.field_name`` to the Python dotted path to function names that will be used for the file field's ``upload_to`` argument.
+
+Default: ``{}``
 
 ``USE_SOUTH``
 -------------

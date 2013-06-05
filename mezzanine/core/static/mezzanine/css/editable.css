@@ -10,11 +10,12 @@ right ahead and fix it.
 /* TOOLBAR */
 
 #editable-toolbar, .editable-highlight, .editable-link {top:0; left:0;
-    z-index:300; display:none; position:absolute;}
-#editable-toolbar {z-index:700;}
+    z-index:300; position:absolute;}
+#editable-toolbar {z-index:700; display:none;}
 #editable-loading {z-index:10000; display:none; position:absolute;}
 #editable-toolbar {position:fixed;}
 .editable-highlight {border:1px solid #ccc;}
+.editable-link {display: block;}
 
 #editable-toolbar, .editable-link {
     background:#fffcc3; float:left; cursor:pointer; padding:4px;
@@ -34,7 +35,7 @@ right ahead and fix it.
 
 .editable-form {padding:20px; background:#fffcc3; border:1px solid #000;
     -moz-box-shadow: 0 0 20px #222; -webkit-box-shadow: 0 0 20px #222;
-    line-height:1em; border-radius:5px;}
+    line-height:1em; border-radius:5px; min-width:350px;}
 .editable-form table, .editable-form textarea, .editable-form input {
     width: 100%; margin: .5em 0;}
 .mceToolbar table {width: auto !important; margin: 0 !important;}

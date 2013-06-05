@@ -1,11 +1,12 @@
 {% extends "admin/base_site.html" %}
 
-{% load i18n %}
+{% load i18n future staticfiles %}
 
 {% block extrahead %}
 {{ block.super }}
-<link rel="stylesheet" href="{{ STATIC_URL }}mezzanine/css/admin/form_entries.css">
-<script src="{{ STATIC_URL }}mezzanine/js/admin/form_entries.js"></script>
+<link rel="stylesheet" href="{% static "mezzanine/css/admin/form_entries.css" %}">
+<script type="text/javascript" src="{% url 'django.views.i18n.javascript_catalog' packages="mezzanine.forms" %}"></script>
+<script src="{% static "mezzanine/js/admin/form_entries.js" %}"></script>
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -56,7 +57,6 @@
     <input type="submit" class="button default" value="{% trans "View entries" %}" />
     <input type="submit" class="button default" name="export" value="{% trans "Export CSV" %}" />
     {% if submitted %}
-    <br clear="both" />
     <h1 id="entries-title">{% trans "Entries" %}</h1>
     {% for row in entries_form.rows %}
     {% if forloop.first %}
